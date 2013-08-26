@@ -10,15 +10,15 @@ set names 'utf8';
 --
 CREATE TABLE IF NOT EXISTS ads (
   serial_number BIGINT UNSIGNED AUTO_INCREMENT,
-  ad_id VARCHAR(8)  NOT NULL UNIQUE
+  ad_id VARCHAR(8)  NOT NULL UNIQUE,
   goods_id  VARCHAR(16) NOT NULL,
-  ad_url  VARHCAR(255) NOT NULL COMMENT 'リダイレクト先のURL',
+  ad_url  VARCHAR(255) NOT NULL COMMENT 'リダイレクト先のURL',
   owner_id  VARCHAR(16) NOT NULL COMMENT '広告主 enduser_id',
-  rate  SMALLINT UNSIGNED NOT NULL DEFAULT 0 '決済額に対する広告報酬の料率千分率',
+  rate  SMALLINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '決済額に対する広告報酬の料率千分率',
   price DOUBLE UNSIGNED NOT NULL COMMENT '出稿時点での決済リンクの金額',
   rate_claim  SMALLINT UNSIGNED NOT NULL DEFAULT 10 COMMENT '決済額に対する広告料請求の料率千分率',
   rate_reward SMALLINT UNSIGNED NOT NULL DEFAULT 5  COMMENT '決済額に対する広告報酬支払の料率千分率',
-  reward  DOUBLE UNSIGNED NOT NULL  COMMENT '(決済リンク金額) × (報酬支払い料率) × 1/1000',
+  reward  DOUBLE UNSIGNED NOT NULL COMMENT '(決済リンク金額) × (報酬支払い料率) × 1/1000',
   link_count  INTEGER UNSIGNED  NULL DEFAULT 0 COMMENT '紹介リンクが発行された数',
   expire_date DATETIME  NOT NULL,
   status_flag SMALLINT UNSIGNED NOT NULL COMMENT '100:出稿中 255:削除',
@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS ads (
   country_code VARCHAR(8) NOT NULL,
   region_code VARCHAR(8) NOT NULL,
   registered_at DATETIME NULL,
-	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY(serial_number,registered_at)
 ) ENGINE=InnoDB character set utf8 PARTITION BY RANGE (TO_DAYS(registered_at))(
 PARTITION epep201301 VALUES LESS THAN (TO_DAYS('2013-01-01')) ENGINE = InnoDB,
 PARTITION epep201302 VALUES LESS THAN (TO_DAYS('2013-02-01')) ENGINE = InnoDB,
@@ -114,7 +115,8 @@ CREATE TABLE IF NOT EXISTS ad_links (
   country_code  VARCHAR(8)  NOT NULL  COMMENT 'GeoIP関数で取得可能な国コード',
   region_code VARCHAR(8)  NOT NULL  COMMENT 'GeoIP関数で取得可能な地域コード',
   registered_at DATETIME NULL,
-	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY(serial_number,registered_at)
 ) ENGINE=InnoDB character set utf8 PARTITION BY RANGE (TO_DAYS(registered_at))(
 PARTITION epep201301 VALUES LESS THAN (TO_DAYS('2013-01-01')) ENGINE = InnoDB,
 PARTITION epep201302 VALUES LESS THAN (TO_DAYS('2013-02-01')) ENGINE = InnoDB,
@@ -186,14 +188,15 @@ CREATE INDEX idx_ad_links_registered_at ON ad_links(registered_at);
 CREATE TABLE IF NOT EXISTS ad_link_clicks ( 
   serial_number BIGINT UNSIGNED AUTO_INCREMENT,
   click_id  VARCHAR(16) NOT NULL UNIQUE, 
-  link_id VARHCAR(8)  NOT NULL  COMMENT 'ad_linkテーブルのlink_id',
+  link_id VARCHAR(8)  NOT NULL  COMMENT 'ad_linkテーブルのlink_id',
   uid VARCHAR(16) NOT NULL  COMMENT 'cookieにアクセスユーザごとに発行する識別ID', 
   ad_id VARCHAR(8)  NOT NULL, http_referrer TEXT  NOT NULL, user_agent  VARCHAR(512) NOT NULL,
   remoto_host VARCHAR(255)  NOT NULL,
   remoto_address  VARCHAR(255)  NOT NULL,
   language  VARCHAR(8)  NOT NULL,
   conversion_id VARCHAR(16) NULL,
-  registered_at DATETIME NULL
+  registered_at DATETIME NULL,
+  PRIMARY KEY(serial_number,registered_at)
 ) ENGINE=InnoDB character set utf8 PARTITION BY RANGE (TO_DAYS(registered_at))(
 PARTITION epep201301 VALUES LESS THAN (TO_DAYS('2013-01-01')) ENGINE = InnoDB,
 PARTITION epep201302 VALUES LESS THAN (TO_DAYS('2013-02-01')) ENGINE = InnoDB,
@@ -269,7 +272,7 @@ CREATE TABLE IF NOT EXISTS ad_conversions (
   click_id  VARCHAR(16) NOT NULL COMMENT 'ad_link_clicksテーブルのclick_id',
   ad_id VARCHAR(8)  NOT NULL,
   claim DOUBLE  NOT NULL,
-  affiliator_id VARHCAR(8) NOT NULL,
+  affiliator_id VARCHAR(8) NOT NULL,
   reword  DOUBLE  NOT NULL,
   status_flag SMALLINT  NOT NULL COMMENT '0:新規, 100:確定, 255:キャンセル・不成立',
   uid VARCHAR(16) NOT NULL,
@@ -278,7 +281,8 @@ CREATE TABLE IF NOT EXISTS ad_conversions (
   remoto_address  VARCHAR(255)  NOT NULL,
   language  VARCHAR(8)  NOT NULL,
   registered_at DATETIME NULL,
-	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY(serial_number,registered_at)
 ) ENGINE=InnoDB character set utf8 BY RANGE (TO_DAYS(registered_at))(
 PARTITION epep201301 VALUES LESS THAN (TO_DAYS('2013-01-01')) ENGINE = InnoDB,
 PARTITION epep201302 VALUES LESS THAN (TO_DAYS('2013-02-01')) ENGINE = InnoDB,
